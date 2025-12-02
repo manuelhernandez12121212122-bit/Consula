@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Consulta de Expediente</title>
+
+<!-- Fuente profesional -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        font-family: "Inter", sans-serif;
+        margin: 0;
+        background: linear-gradient(135deg, #002a6f, #0052cc);
+        /* Fondo azul profesional */
+        min-height: 100vh;
+        padding-bottom: 40px;
+    }
+
+    header {
+        background: #ffffff10;
+        backdrop-filter: blur(10px);
+        color: #fff;
+        padding: 18px;
+        text-align: center;
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid #ffffff30;
+    }
+
+    .login-container, .app-container {
+        max-width: 450px;
+        margin: 40px auto;
+        background: rgba(255, 255, 255, 0.92);
+        padding: 35px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        backdrop-filter: blur(8px);
+    }
+
+    h2 {
+        text-align: center;
+        color: #1a1a1a;
+        margin-bottom: 25px;
+    }
+
+    input {
+        width: 100%;
+        padding: 15px;
+        margin: 10px 0;
+        font-size: 16px;
+        border-radius: 8px;
+        border: 1px solid #bfc7d4;
+    }
+
+    button {
+        width: 100%;
+        padding: 15px;
+        border: none;
+        background: #1a73e8;
+        color: white;
+        font-size: 17px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 10px;
+        font-weight: 600;
+        transition: 0.25s;
+    }
+
+    button:hover {
+        background: #155dc0;
+    }
+
+    .result-box {
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 20px;
+        white-space: pre-line;
+        font-size: 15px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    .pdf-btn {
+        background: #14a44d;
+    }
+
+    .pdf-btn:hover {
+        background: #0e7e3a;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .folio-list {
+        margin-top: 15px;
+        padding: 15px;
+        background: #e9f1ff;
+        border-radius: 8px;
+        font-size: 14px;
+        border-left: 4px solid #1a73e8;
+    }
+
+    footer {
+        text-align: center;
+        padding: 15px;
+        margin-top: 40px;
+        font-size: 13px;
+        color: #e0e0e0;
+    }
+</style>
+</head>
+
+<body>
+
+<header>Consulta de Expediente - Sistema Profesional</header>
+
+<!-- LOGIN -->
+<div class="login-container" id="login">
+    <h2>Iniciar Sesión</h2>
+    <p style="text-align:center; color:#444;">Ingresa cualquier texto para acceder</p>
+
+    <input type="password" id="loginKey" placeholder="Clave de acceso">
+    <button onclick="login()">Ingresar</button>
+</div>
+
+<!-- APP PRINCIPAL -->
+<div class="app-container hidden" id="app">
+    <h2>Consultar Folio</h2>
+
+    <input type="text" id="folioInput" placeholder="Ingrese el folio a consultar">
+    <button onclick="consultarFolio()">Consultar</button>
+
+    <div class="folio-list">
+        <b>Folios disponibles para pruebas:</b>
+        <br>F001<br>F002<br>F003<br>F004<br>ABC123<br>X9Z88
+    </div>
+
+    <div id="result" class="result-box hidden"></div>
+
+    <button id="btnPDF" class="pdf-btn hidden" onclick="exportarPDF()">Exportar a PDF</button>
+</div>
+
+<footer>2025 © Sistema de Consulta. Todos los derechos reservados.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+
+<script>
+// Simulación de folios
+const foliosSimulados = {
+    "F001": { fecha:"2025-01-14", estatus:"Activo", descripcion:"Paciente en seguimiento continuo." },
+    "F002": { fecha:"2024-11-02", estatus:"Concluido", descripcion:"Tratamiento finalizado exitosamente." },
+    "F003": { fecha:"2025-02-20", estatus:"Pendiente", descripcion:"Cita próxima en 3 días." },
+    "ABC123": { fecha:"2025-03-01", estatus:"Cancelado", descripcion:"Expediente cerrado por duplicado." }
+};
+
+function login() {
+    const key = document.getElementById("loginKey").value.trim();
+    if (key.length === 0) return alert("Ingresa una clave para continuar.");
+
+    document.getElementById("login").classList.add("hidden");
+    document.getElementById("app").classList.remove("hidden");
+}
+
+function consultarFolio() {
+    const folio = document.getElementById("folioInput").value.trim().toUpperCase();
+    const resultBox = document.getElementById("result");
+    const pdfBtn = document.getElementById("btnPDF");
+
+    if (folio === "") {
+        resultBox.textContent = "⚠️ Ingrese un folio para realizar la consulta.";
+        resultBox.classList.remove("hidden");
+        pdfBtn.classList.add("hidden");
+        return;
+    }
+
+    if (foliosSimulados[folio]) {
+        const d = foliosSimulados[folio];
+
+        resultBox.textContent =
+            `📅 Fecha de último tratamiento: ${d.fecha}\n` +
+            `✅ Estatus: ${d.estatus}\n` +
+            `📝 Descripción: ${d.descripcion}\n\n` +
+            `ℹ️ Si necesita más detalles, contacte al área correspondiente.`;
+
+        pdfBtn.classList.remove("hidden");
+    } else {
+        resultBox.textContent =
+            `❗ No se encontró información para el folio '${folio}'.\nPor favor verifique el número e inténtelo de nuevo.`;
+
+        pdfBtn.classList.add("hidden");
+    }
+
+    resultBox.classList.remove("hidden");
+}
+
+function exportarPDF() {
+    const elemento = document.getElementById("result");
+    const opciones = {
+        margin: 10,
+        filename: "resultado_folio.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { format: "letter", orientation: "portrait" }
+    };
+    html2pdf().set(opciones).from(elemento).save();
+}
+</script>
+
+</body>
+</html>
